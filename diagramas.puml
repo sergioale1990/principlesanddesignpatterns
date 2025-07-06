@@ -1,0 +1,244 @@
+@startuml
+class org.example.domain.entity.OrderItem {
+- Long id
+- Product product
+- int quantity
+- Double price
+- Order order
++ void setOrder(Order)
++ Product getProduct()
++ void setProduct(Product)
++ void setPrice(Double)
++ int getQuantity()
++ Double getPrice()
++ Long getId()
++ Order getOrder()
++ void setQuantity(int)
+}
+
+
+class org.example.api.controller.ProductController {
+- ProductService productService
++ ResponseEntity createProduct(Product)
++ ResponseEntity<List<Product>> getAllProducts()
++ ResponseEntity<Product> getProductById(Long)
+}
+
+
+class org.example.domain.strategy.TotalSalesReportStrategy {
+- OrderRepository orderRepository
++ String getType()
++ Map<String,Object> generateReport()
+}
+
+
+abstract class org.example.domain.report.ReportDecorator {
+# ReportComponent reportComponent
+}
+
+class org.example.Main {
++ {static} void main(String[])
+}
+
+interface org.example.domain.report.ReportComponent {
+~ Map<String,Object> generateReport()
+}
+
+class org.example.domain.factory.SalidaKardexFactory {
++ Kardex createFrom(OrderItem,Long)
+}
+
+class org.example.domain.report.BasicReport {
+- ReportStrategy strategy
++ Map<String,Object> generateReport()
+}
+
+
+class org.example.api.controller.ReportController {
+- ReportService reportService
++ ResponseEntity<Map<String,Object>> getReport(String,boolean)
++ ResponseEntity<Map<String,Object>> getCombinedReport(List<String>)
+}
+
+
+class org.example.domain.service.OrderService {
+- OrderRepository orderRepository
+- ProductRepository productRepository
+- KardexService kardexService
++ OrderStatusNotifier orderStatusNotifier
++ Order createOrder(Order)
++ Order updateStatusOrder(Long,int)
++ Optional<Order> findById(Long)
+}
+
+
+class org.example.domain.observer.OrderStatusNotifier {
+- List<OrderStatusObserver> observers
++ void registerObserver(OrderStatusObserver)
++ void notifyObservers(Order,int,int)
+}
+
+
+interface org.example.domain.repository.KardexRepository {
+}
+class org.example.domain.service.ReportService {
+- Map<String,ReportStrategy> reportStrategies
++ Map<String,Object> generateReport(String)
++ Map<String,Object> generateCombinedReport(List<String>)
+}
+
+
+class org.example.domain.service.ProductService {
+- ProductRepository productRepository
++ Product save(Product)
++ List<Product> findAll()
++ Optional<Product> finById(Long)
+}
+
+
+interface org.example.domain.strategy.ReportStrategy {
+~ String getType()
+~ Map<String,Object> generateReport()
+}
+
+class org.example.domain.entity.Order {
+- Long id
+- LocalDateTime orderDate
+- Double total
+- int status
+- List<OrderItem> items
++ void addItem(OrderItem)
++ List<OrderItem> getItems()
++ void setTotal(double)
++ Long getId()
++ void setId(Long)
++ LocalDateTime getOrderDate()
++ Double getTotal()
++ int getStatus()
++ void setStatus(int)
+}
+
+
+class org.example.domain.entity.Product {
+- Long id
+- String name
+- String description
+- Double price
++ Long getId()
++ Double getPrice()
++ void setPrice(Double)
++ String getName()
++ void setName(String)
++ String getDescription()
+}
+
+
+interface org.example.domain.observer.OrderStatusObserver {
+~ void onStatusChanged(Order,int,int)
+}
+
+class org.example.domain.report.TimestampReportDecorator {
++ Map<String,Object> generateReport()
+}
+
+interface org.example.domain.repository.OrderRepository {
+}
+class org.example.domain.observer.ConsoleNotifier {
++ void onStatusChanged(Order,int,int)
+}
+
+interface org.example.domain.repository.ProductRepository {
+~ List<Product> findAll()
+}
+
+class org.example.domain.builder.OrderBuilder {
+- int status
+- List<OrderItem> items
++ OrderBuilder withStatus(int)
++ OrderBuilder addItem(Product,int)
++ Order build()
+}
+
+
+class org.example.domain.service.KardexService {
+- KardexRepository kardexRepository
+- Map<String,KardexFactory> kardexFactories
++ void registrarMovimiento(List<OrderItem>,Long,String)
++ void registrarSalida(Order)
+}
+
+
+class org.example.domain.strategy.ProductSalesReportStrategy {
+- OrderRepository orderRepository
++ String getType()
++ Map<String,Object> generateReport()
+}
+
+
+class org.example.domain.strategy.OrderSummaryReportStrategy {
+- OrderRepository orderRepository
++ String getType()
++ Map<String,Object> generateReport()
+}
+
+
+interface org.example.domain.factory.KardexFactory {
+~ Kardex createFrom(OrderItem,Long)
+}
+
+class org.example.domain.report.CompositeReport {
+- List<ReportComponent> components
++ void addComponent(ReportComponent)
++ Map<String,Object> generateReport()
+}
+
+
+class org.example.domain.entity.Kardex {
+- Long id
+- Product product
+- LocalDateTime date
+- int quantity
+- Order order
+- String movementType
++ String getMovementType()
++ void setMovementType(String)
++ void setProduct(Product)
++ Long getId()
++ Product getProduct()
++ LocalDateTime getDate()
++ void setDate(LocalDateTime)
++ int getQuantity()
++ void setQuantity(int)
++ Order getOrder()
++ void setOrder(Order)
+}
+
+
+class org.example.api.controller.OrderController {
+- OrderService orderService
++ ResponseEntity<Order> createOrder(Order)
++ ResponseEntity<Order> getOrderById(Long)
++ ResponseEntity<Order> updateStatusOrder(Long,int)
+}
+
+
+class org.example.domain.factory.EntradaKardexFactory {
++ Kardex createFrom(OrderItem,Long)
+}
+
+
+
+org.example.domain.strategy.ReportStrategy <|.. org.example.domain.strategy.TotalSalesReportStrategy
+org.example.domain.report.ReportComponent <|.. org.example.domain.report.ReportDecorator
+org.example.domain.factory.KardexFactory <|.. org.example.domain.factory.SalidaKardexFactory
+org.example.domain.report.ReportComponent <|.. org.example.domain.report.BasicReport
+org.springframework.data.jpa.repository.JpaRepository <|-- org.example.domain.repository.KardexRepository
+org.example.domain.report.ReportDecorator <|-- org.example.domain.report.TimestampReportDecorator
+org.springframework.data.jpa.repository.JpaRepository <|-- org.example.domain.repository.OrderRepository
+org.example.domain.observer.OrderStatusObserver <|.. org.example.domain.observer.ConsoleNotifier
+org.springframework.data.jpa.repository.JpaRepository <|-- org.example.domain.repository.ProductRepository
+org.example.domain.strategy.ReportStrategy <|.. org.example.domain.strategy.ProductSalesReportStrategy
+org.example.domain.strategy.ReportStrategy <|.. org.example.domain.strategy.OrderSummaryReportStrategy
+org.example.domain.report.ReportComponent <|.. org.example.domain.report.CompositeReport
+org.example.domain.factory.KardexFactory <|.. org.example.domain.factory.EntradaKardexFactory
+@enduml
